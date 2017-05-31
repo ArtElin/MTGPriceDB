@@ -1,15 +1,12 @@
 import json
-import urllib.request
 from enum import Enum
-import pickle
 import os.path
 from mtgsdk import Card
+import urllib.request
 
 
 
-class Urllable(str):
-    def tourl(self):
-        return "%20".join(self.split())
+
 
 class Color(Enum):
     W = 1
@@ -19,46 +16,8 @@ class Color(Enum):
     G = 5
 
 
-class CardDB:
-    name = Urllable("")
-    set = Urllable("")
-    price = ""
-    color = None
-    quantity = "0"
-    def findCFB(self):
-        jsonResponce = json.load(
-            urllib.request.urlopen("http://magictcgprices.appspot.com/api/cfb/price.json?cardname=" +
-                                   self.name.tourl() + "&setname=" + self.set.tourl()))
-        return jsonResponce.pop()
-    def getDBid(self):
-        return self.name+'@'+self.set
-    def __init__(self, name, mtgset, color):
-        self.name = Urllable(name)
-        self.set = Urllable(mtgset)
-        self.price = self.findCFB()
-        self.color = set(color)
-    def __init__(self, name, mtgset, color, quantity):
-        self.name = Urllable(name)
-        self.set = Urllable(mtgset)
-        self.price = self.findCFB()
-        self.color = set(color)
-        self.quantity = quantity
-    def __str__(self):
-        return "Card object "+self.name+" from "+self.set
 
-DB = {}
 
-def addtoDB(Card):
-    DB[Card.getDBid()] = Card
-
-def saveDB():
-    with open('DB' + '.pkl', 'wb') as f:
-        pickle.dump(DB, f, pickle.HIGHEST_PROTOCOL)
-
-def readDB():
-    print(1)
-    with open('DB' + '.pkl', 'rb') as f:
-       return pickle.load(f)
 
 def checkpic(picid):
     if os.path.isfile('CardImages/'+picid+'.jpg') != True:
@@ -68,8 +27,9 @@ def checkpic(picid):
 
 def getMVid(DBid):
     idarr = DBid.split('@')
+    if idarr[1] in translateSet: idarr[1] = translateSet[idarr[1]]
     card = Card.where(name=idarr[0]) \
-        .where(set=translateSet[idarr[1]]) \
+        .where(set=idarr[1]) \
         .all()
     print(card[0].multiverse_id)
     print(card[0].number)

@@ -3,6 +3,8 @@ from tkinter import ttk
 from tkinter import *
 from PIL import ImageTk, Image
 import Main
+from db import DB
+from db import CardDB
 
 def addcard(*args):
     tree.insert('', 'end', 'new')
@@ -15,24 +17,24 @@ def addcard(*args):
 def savecard(*args):
     if tree.focus()=='new':
         tree.delete('new')
-        newcard = Main.CardDB(name.get(), mtgset.get(), [Main.Color.G], quantity.get())
-        Main.addtoDB(newcard)
-        Main.saveDB()
+        newcard = CardDB(name.get(), mtgset.get(), [Main.Color.G], quantity.get())
+        db.add(newcard)
+        db.save()
         tree.insert('', 'end', newcard.getDBid(), text=newcard.name, values = (newcard.set,quantity.get(),newcard.price))
         Main.checkpic(newcard.getDBid())
         tree.selection_set(newcard.getDBid())
     else:
         tree.set(tree.selection()[0], 'quantity', cardquantity.get())
-        Main.DB[tree.selection()[0]].quantity = cardquantity.get()
-        Main.saveDB()
+        db.database[tree.selection()[0]].quantity = cardquantity.get()
+        db.save()
 
 def delete(*args):
-    if tree.selection()[0] != 'new': del Main.DB[tree.selection()[0]]
-    Main.saveDB()
+    if tree.selection()[0] != 'new': del db.database[tree.selection()[0]]
+    db.save()
     tree.delete(tree.selection()[0])
 
 def changepic(picname):
-    loadedimg = ImageTk.PhotoImage(Image.open('CardImages/'+picname+'.jpg').resize((450, 640)))
+    loadedimg = ImageTk.PhotoImage(Image.open('CardImages/'+picname+'.jpg'))#.resize((336, 468)))
     cardimage['image'] = loadedimg
     cardimage.image = loadedimg
 
@@ -42,17 +44,17 @@ def changefocus():
     if tree.focus()=='new':
         changepic('Back')
         return None
-    cardname.set(Main.DB[tree.selection()[0]].name)
-    setname.set(Main.DB[tree.selection()[0]].set)
-    cardquantity.set(Main.DB[tree.selection()[0]].quantity)
+    cardname.set(db.database[tree.selection()[0]].name)
+    setname.set(db.database[tree.selection()[0]].set)
+    cardquantity.set(db.database[tree.selection()[0]].quantity)
     changepic(tree.selection()[0])
     if tree.exists('new'): tree.delete('new')
 
 def getDB():
     tree.delete(*tree.get_children())
-    Main.DB = Main.readDB()
-    for item in Main.DB:
-        card = Main.DB[item]
+    db.read()
+    for item in db.database:
+        card = db.database[item]
         tree.insert('', 'end', item, text=card.name, values = (card.set,card.quantity,card.price))
         Main.checkpic(item)
 
@@ -60,7 +62,8 @@ def getDB():
 #This creates the main window of an application
 window = tk.Tk()
 window.title("MTGPricer")
-window.geometry("1200x800")
+#window.geometry("1200x1050")
+window.state('zoomed')
 window.configure(background='white')
 window.grid_columnconfigure(0, weight=1)
 window.grid_rowconfigure(0,weight=1)
@@ -68,7 +71,7 @@ window.grid()
 
 #This loads cardimage
 path = "CardImages/back.jpg"
-loadedimg = ImageTk.PhotoImage(Image.open(path).resize((450,640)))
+loadedimg = ImageTk.PhotoImage(Image.open(path))#.resize((450,640)))
 
 #This creates Entry vars
 cardname = StringVar()
@@ -129,5 +132,6 @@ quantity.grid(column=0, row=5, sticky=(N,W,E,S), padx=5)
 
 
 #Start the GUI
+db = DB()
 getDB()
 window.mainloop()
