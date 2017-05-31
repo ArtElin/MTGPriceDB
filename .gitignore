@@ -97,3 +97,8 @@ ENV/
 
 .idea
 
+/.idea/
+.idea/workspace.xml
+CardImages/Thumbs.db
+DB.pkl
+Thumbs.db
