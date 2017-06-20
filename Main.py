@@ -21,13 +21,23 @@ class Color(Enum):
 
 def checkpic(picid):
     if os.path.isfile('CardImages/'+picid+'.jpg') != True:
-        jsonResponce = json.load(urllib.request.urlopen('https://api.scryfall.com/cards/' + str(getMVid(picid)) + "?format=json"))
+        print('https://api.scryfall.com/cards/multiverse' + str(getMVid(picid)) + "?format=json")
+        jsonResponce = json.load(urllib.request.urlopen('https://api.scryfall.com/cards/multiverse/' + str(getMVid(picid))))
         print(jsonResponce["image_uris"]["large"])
         urllib.request.urlretrieve(jsonResponce["image_uris"]["large"], 'CardImages/' + picid + '.jpg')
 
 def getMVid(DBid):
     idarr = DBid.split('@')
+    print(idarr[1])
+    print(idarr[0])
     if idarr[1] in translateSet: idarr[1] = translateSet[idarr[1]]
+    for setJson in jsonSets['data']:
+        print(setJson['name'].lower())
+        if idarr[1].lower() == setJson['name'].lower():
+            idarr[1] = setJson['code']
+            print(idarr[1])
+    print(idarr[0])
+    print(idarr[1])
     card = Card.where(name=idarr[0]) \
         .where(set=idarr[1]) \
         .all()
@@ -64,3 +74,5 @@ translateSet = {
     'Origins': 'ORI',
     'Magic 2012': 'M12'
 }
+
+jsonSets = json.load(urllib.request.urlopen('https://api.scryfall.com/sets/'))
