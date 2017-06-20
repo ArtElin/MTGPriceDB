@@ -26,6 +26,7 @@ def savecard(*args):
     else:
         tree.set(tree.selection()[0], 'quantity', cardquantity.get())
         db.database[tree.selection()[0]].quantity = cardquantity.get()
+        db.database[tree.selection()[0]].set = cardquantity.get()
         db.save()
 
 def delete(*args):
@@ -57,6 +58,16 @@ def getDB():
         card = db.database[item]
         tree.insert('', 'end', item, text=card.name, values = (card.set,card.quantity,card.price))
         Main.checkpic(item)
+
+def treeview_sort_column(tv, col, reverse):
+    l = [(tv.set(k, col), k) for k in tv.get_children('')]
+    l.sort(key=lambda t: int(t[0]), reverse=reverse)
+    #      ^^^^^^^^^^^^^^^^^^^^^^^
+
+    for index, (val, k) in enumerate(l):
+        tv.move(k, '', index)
+
+    tv.heading(col, command=lambda: treeview_sort_column(tv, col, not reverse))
 
 
 #This creates the main window of an application
