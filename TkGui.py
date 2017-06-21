@@ -17,7 +17,7 @@ def addcard(*args):
 def savecard(*args):
     if tree.focus()=='new':
         tree.delete('new')
-        newcard = CardDB(name.get(), mtgset.get(), [Main.Color.G], quantity.get())
+        newcard = CardDB(name.get(), Main.getSetname(mtgset.get()), [Main.Color.G], quantity.get())
         db.add(newcard)
         db.save()
         tree.insert('', 'end', newcard.getDBid(), text=newcard.name, values = (newcard.set,quantity.get(),newcard.price))
